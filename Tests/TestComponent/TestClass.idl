@@ -1,0 +1,16 @@
+namespace TestComponent
+{
+    [default_interface]
+    runtimeclass TestClass
+    {
+        [static_name("IStaticTestClass", AE580A22-5CFC-4F16-9230-24EB36BA128C)]
+        {
+            static IVectorView<Int32> Numbers { get; };
+            static IVectorView<String> Strings { get; };
+            static IVectorView<IVectorView<String> > NestedStrings { get; };
+			static IVectorView<Windows.Foundation.Collections.PropertySet> PropertySets { get; };
+            static IVector<String> ModifiableStrings { get; };
+            static IVector<Int32> ModifiableNumbers { get; };
+        }
+    }
+}
