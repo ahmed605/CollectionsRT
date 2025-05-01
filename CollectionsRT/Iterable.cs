@@ -1,10 +1,18 @@
 ﻿using CollectionsRT.Details;
+using CollectionsRT.Marshallers;
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+#if NET
+using System.Runtime.InteropServices.Marshalling;
+#endif
+
 namespace CollectionsRT
 {
+#if NET
+    [NativeMarshalling(typeof(SourceGenIterableMarshaller<>))]
+#endif
     public unsafe class Iterable<T> : IIterable, System.Collections.Generic.IEnumerable<T>, ICollectionType
     {
         private IIterable<nint>* _iterable;

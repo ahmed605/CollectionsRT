@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -10,7 +11,13 @@ namespace CollectionsRT.Details
     {
         private static Dictionary<Type, bool> cachedTypes = [];
 
-        public static bool IsUnManaged(this Type t)
+        public static bool IsBlittable
+        (
+#if NET
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.NonPublicFields)]
+#endif
+            this Type t
+        )
         {
             var result = false;
 
@@ -27,9 +34,7 @@ namespace CollectionsRT.Details
             }
             else
             {
-                result = t.GetFields(BindingFlags.Public |
-                                     BindingFlags.NonPublic | BindingFlags.Instance)
-                                     .All(x => x.FieldType.IsUnManaged());
+                result = t.GetFields(BindingFlags.Public | BindingFlags.NonPublic).All(x => x.FieldType.IsBlittable());
             }
 
             cachedTypes.Add(t, result);

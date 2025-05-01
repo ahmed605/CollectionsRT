@@ -1,15 +1,14 @@
-﻿using System;
-using System.Diagnostics;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using Windows.Foundation.Collections;
-using CollectionsRT;
+﻿using CollectionsRT;
 using CollectionsRT.Interop;
 using CollectionsRT.Marshallers;
+using System.Runtime.InteropServices;
+using Windows.Foundation.Collections;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.Marshalling;
 
 namespace TestProject.Modern
 {
-    public unsafe class Program
+    public unsafe partial class Program
     {
         [TreatAsWindowsRuntimeClass]
         [RuntimeClassName("TestComponent.NonStaticTestClass")]
@@ -23,6 +22,20 @@ namespace TestProject.Modern
             int GetTrustLevel(int* trustLevel);
 
             String TheString { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(HStringMarshaller))] get; }
+        }
+
+        [TreatAsWindowsRuntimeClass]
+        [RuntimeClassName("TestComponent.NonStaticTestClass")]
+        [RuntimeClassDefaultInterface(typeof(INonStaticTestClass))]
+        [GeneratedComInterface(StringMarshallingCustomType = typeof(SourceGenHStringMarshaller))]
+        [Guid("E085521E-4B9F-42D8-A99C-DF0A29F6D44A")]
+        public partial interface INonStaticTestClassSourceGen
+        {
+            int GetIids(uint* iidCount, Guid** iids);
+            int GetRuntimeClassName(void** className);
+            int GetTrustLevel(int* trustLevel);
+
+            String TheString();
         }
 
         [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -74,6 +87,23 @@ namespace TestProject.Modern
             IList<string> ModifiableStrings { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<string>))] get; }
             IList<int> ModifiableNumbers { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<int>))] get; }
             IList<INonStaticTestClass> Classes { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<INonStaticTestClass>))] get; }
+        }
+
+        [GeneratedComInterface]
+        [Guid("AE580A22-5CFC-4F16-9230-24EB36BA128C")]
+        public partial interface IStaticTestClassSourceGen
+        {
+            int GetIids(uint* iidCount, Guid** iids);
+            int GetRuntimeClassName(void** className);
+            int GetTrustLevel(int* trustLevel);
+
+            VectorView<int> Numbers();
+            VectorView<string> Strings();
+            VectorView<VectorView<string>> NestedStrings();
+            VectorView<PropertySet> PropertySets();
+            Vector<string> ModifiableStrings();
+            Vector<int> ModifiableNumbers();
+            Vector<INonStaticTestClassSourceGen> Classes();
         }
 
         [DllImport("TestComponent.dll", CallingConvention = CallingConvention.StdCall, PreserveSig = true)]
@@ -372,14 +402,114 @@ namespace TestProject.Modern
             }
         }
 
+        static void TestSourceGenMarshal(void* factory)
+        {
+            Console.WriteLine("SourceGen Marshal Test");
+
+            IStaticTestClassSourceGen testClass = ComInterfaceMarshaller<IStaticTestClassSourceGen>.ConvertToManaged(factory) ?? throw new();
+            var numbers = testClass.Numbers();
+
+            var count = numbers.Count;
+            foreach (int i in numbers)
+            {
+                Console.WriteLine(i);
+            }
+
+            var strings = testClass.Strings();
+            var count2 = strings.Count;
+            foreach (string i in strings)
+            {
+                Console.WriteLine(i);
+            }
+
+            var nestedStrings = testClass.NestedStrings();
+            foreach (var i in nestedStrings)
+            {
+                Console.WriteLine($"Count: {i.Count}");
+                foreach (string j in i)
+                {
+                    Console.WriteLine(j);
+                }
+            }
+
+            var propertySets = testClass.PropertySets();
+            foreach (var i in propertySets)
+            {
+                Console.WriteLine($"Count: {i.Count}");
+                foreach (var j in i)
+                {
+                    Console.WriteLine(j);
+                }
+            }
+
+            var modifiableStrings = testClass.ModifiableStrings();
+
+            var count3 = modifiableStrings.Count;
+            Console.WriteLine($"Count: {count3}");
+
+            foreach (string i in modifiableStrings)
+            {
+                Console.WriteLine(i);
+            }
+
+            modifiableStrings.Add("Modifiable Four!!");
+
+            var count4 = modifiableStrings.Count;
+            Console.WriteLine($"Count: {count4}");
+
+            foreach (string i in modifiableStrings)
+            {
+                Console.WriteLine(i);
+            }
+
+            modifiableStrings[2] = "Modifiable Five!!";
+
+            foreach (string i in modifiableStrings)
+            {
+                Console.WriteLine(i);
+            }
+
+            var modifiableNumbers = testClass.ModifiableNumbers();
+
+            foreach (int i in modifiableNumbers)
+            {
+                Console.WriteLine(i);
+            }
+
+            modifiableNumbers.Add(100);
+
+            foreach (int i in modifiableNumbers)
+            {
+                Console.WriteLine(i);
+            }
+
+            modifiableNumbers[2] = 700;
+
+            foreach (int i in modifiableNumbers)
+            {
+                Console.WriteLine(i);
+            }
+
+            var classes = testClass.Classes();
+            foreach (INonStaticTestClassSourceGen i in classes)
+            {
+                Console.WriteLine(i.TheString());
+            }
+        }
+
         public static void Main(string[] args)
         {
             void* factory = default;
             Marshal.ThrowExceptionForHR(DllGetActivationFactory((void*)WinRT.MarshalString.FromManaged("TestComponent.TestClass"), &factory));
 
-            TestManualMarshal(factory);
-            TestAutoMarshal(factory);
-            TestDotNetMarshal(factory);
+            if (RuntimeFeature.IsDynamicCodeCompiled)
+            {
+                TestManualMarshal(factory);
+                TestAutoMarshal(factory);
+                TestDotNetMarshal(factory);
+            }
+
+            TestSourceGenMarshal(factory);
         }
     }
 
@@ -408,6 +538,28 @@ namespace TestProject.Modern
         {
             return sizeof(void*);
         }
+    }
+
+    [CustomMarshaller(typeof(string), MarshalMode.Default, typeof(SourceGenHStringMarshaller))]
+    internal static unsafe class SourceGenHStringMarshaller
+    {
+        public static void* ConvertToUnmanaged(string managed)
+        {
+            if (managed is null)
+                return null;
+
+            return (void*)WinRT.MarshalString.FromManaged(managed);
+        }
+
+        public static string ConvertToManaged(void* unmanaged)
+        {
+            if (unmanaged == null)
+                return string.Empty;
+
+            return WinRT.MarshalString.FromAbi((nint)unmanaged);
+        }
+
+        public static void Free(void* unmanaged) => WinRT.MarshalString.DisposeAbi((nint)unmanaged);
     }
 }
 

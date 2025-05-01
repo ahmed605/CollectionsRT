@@ -1,11 +1,18 @@
 ﻿using CollectionsRT.Details;
+using CollectionsRT.Marshallers;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
+
+#if NET
+using System.Runtime.InteropServices.Marshalling;
+#endif
 
 namespace CollectionsRT
 {
+#if NET
+    [NativeMarshalling(typeof(SourceGenVectorMarshaller<>))]
+#endif
     public unsafe class Vector<T> : Iterable<T>, IList<T>, IVector, ICollectionType
     {
         private IVector<nint>* _vector;
@@ -51,7 +58,7 @@ namespace CollectionsRT
         { 
             get
             {
-                if (typeof(T).IsUnManaged())
+                if (typeof(T).IsBlittable())
                 {
                     T value = default;
                     Marshal.ThrowExceptionForHR(((IVector<T>*)_vector)->GetAt((uint)index, &value));
@@ -67,7 +74,7 @@ namespace CollectionsRT
 
             set
             {
-                if (typeof(T).IsUnManaged())
+                if (typeof(T).IsBlittable())
                 {
                     Marshal.ThrowExceptionForHR(((IVector<T>*)_vector)->SetValueAt((uint)index, value));
                 }
@@ -92,7 +99,7 @@ namespace CollectionsRT
 
         public void Add(T item)
         {
-            if (typeof(T).IsUnManaged())
+            if (typeof(T).IsBlittable())
             {
                 Marshal.ThrowExceptionForHR(((IVector<T>*)_vector)->AppendValue(item));
             }
@@ -109,7 +116,7 @@ namespace CollectionsRT
 
         public bool Contains(T item)
         {
-            if (typeof(T).IsUnManaged())
+            if (typeof(T).IsBlittable())
             {
                 byte found = 0;
                 uint index = 0;
@@ -133,7 +140,7 @@ namespace CollectionsRT
             if (arrayIndex < 0 || arrayIndex >= array.Length)
                 throw new ArgumentOutOfRangeException($"{nameof(arrayIndex)} is out of range.");
 
-            if (typeof(T).IsUnManaged())
+            if (typeof(T).IsBlittable())
             {
                 fixed (T* pArray = array)
                 {
@@ -154,7 +161,7 @@ namespace CollectionsRT
 
         public int IndexOf(T item)
         {
-            if (typeof(T).IsUnManaged())
+            if (typeof(T).IsBlittable())
             {
                 byte found = 0;
                 uint index = 0;
@@ -172,7 +179,7 @@ namespace CollectionsRT
 
         public void Insert(int index, T item)
         {
-            if (typeof(T).IsUnManaged())
+            if (typeof(T).IsBlittable())
             {
                 Marshal.ThrowExceptionForHR(((IVector<T>*)_vector)->InsertValueAt((uint)index, item));
             }
@@ -184,7 +191,7 @@ namespace CollectionsRT
 
         public bool Remove(T item)
         {
-            if (typeof(T).IsUnManaged())
+            if (typeof(T).IsBlittable())
             {
                 byte found = 0;
                 uint index = 0;

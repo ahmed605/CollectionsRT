@@ -1,12 +1,18 @@
 ﻿using CollectionsRT.Details;
 using CollectionsRT.Marshallers;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
+#if NET
+using System.Runtime.InteropServices.Marshalling;
+#endif
+
 namespace CollectionsRT
 {
+#if NET
+    [NativeMarshalling(typeof(SourceGenVectorViewMarshaller<>))]
+#endif
     public unsafe class VectorView<T> : Iterable<T>, IReadOnlyList<T>, IVectorView, ICollectionType
     {
         private IVectorView<nint>* _view;
@@ -52,7 +58,7 @@ namespace CollectionsRT
         {
             get
             {
-                if (typeof(T).IsUnManaged())
+                if (typeof(T).IsBlittable())
                 {
                     T value = default;
                     Marshal.ThrowExceptionForHR(((IVectorView<T>*)_view)->GetAt((uint)index, &value));

@@ -126,13 +126,13 @@ namespace CollectionsRT.Details
             }
             else if (typeof(ICollectionType).IsAssignableFrom(t))
             {
-                var ptr = ((ICollectionType)value).GetPointer();
-                ((IUnknown*)ptr)->AddRef();
-                return ptr;
+                return ((ICollectionType)value).GetPointer();
             }
 
 #if !NET
-            return (void*)Marshal.GetIUnknownForObject(value);
+            var ptr = Marshal.GetIUnknownForObject(value);
+            Marshal.Release(ptr);
+            return (void*)ptr;
 #else
             try
             {
@@ -142,11 +142,13 @@ namespace CollectionsRT.Details
             {
                 try
                 {
-                    return ComInterfaceMarshaller<T>.ConvertToUnmanaged((T)value);
+                    return ComInterfaceMarshaller<T>.ConvertToUnmanaged(value);
                 }
                 catch
                 {
-                    return (void*)Marshal.GetIUnknownForObject(value);
+                    var ptr = Marshal.GetIUnknownForObject(value);
+                    Marshal.Release(ptr);
+                    return (void*)ptr;
                 }
             }
 #endif

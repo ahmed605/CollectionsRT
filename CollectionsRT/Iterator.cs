@@ -1,12 +1,20 @@
 ﻿using CollectionsRT.Details;
+using CollectionsRT.Marshallers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+#if NET
+using System.Runtime.InteropServices.Marshalling;
+#endif
+
 namespace CollectionsRT
 {
+#if NET
+    [NativeMarshalling(typeof(SourceGenIteratorMarshaller<>))]
+#endif
     public unsafe class Iterator<T> : IIterator, IEnumerator<T>, ICollectionType
     {
         private IIterator<nint>* _iterator;
@@ -53,7 +61,7 @@ namespace CollectionsRT
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private T GetCurrent()
         {
-            if (typeof(T).IsUnManaged())
+            if (typeof(T).IsBlittable())
             {
                 T value = default;
                 Marshal.ThrowExceptionForHR(((IIterator<T>*)_iterator)->get_Current(&value));

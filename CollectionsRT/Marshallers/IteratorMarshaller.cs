@@ -1,7 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
+
+#if NET
+using System.Runtime.InteropServices.Marshalling;
+#endif
 
 namespace CollectionsRT.Marshallers
 {
@@ -38,4 +40,28 @@ namespace CollectionsRT.Marshallers
             return new Iterator<T>((void*)pNativeData, false);
         }
     }
+
+#if NET
+    [CustomMarshaller(typeof(Iterator<>), MarshalMode.Default, typeof(SourceGenIteratorMarshaller<>))]
+    public static unsafe class SourceGenIteratorMarshaller<T>
+    {
+        public static void* ConvertToUnmanaged(Iterator<T> managed)
+        {
+            if (managed is null)
+                return null;
+
+            return managed.GetPointer();
+        }
+
+        public static Iterator<T> ConvertToManaged(void* unmanaged)
+        {
+            if (unmanaged == null)
+                return null;
+
+            return new Iterator<T>(unmanaged, false);
+        }
+
+        public static void Free(void* unmanaged) { }
+    }
+#endif
 }

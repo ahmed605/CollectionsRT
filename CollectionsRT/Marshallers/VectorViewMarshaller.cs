@@ -1,7 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Text;
+
+#if NET
+using System.Runtime.InteropServices.Marshalling;
+#endif
 
 namespace CollectionsRT.Marshallers
 {
@@ -38,4 +40,28 @@ namespace CollectionsRT.Marshallers
             return new VectorView<T>((void*)pNativeData, false);
         }
     }
+
+#if NET
+    [CustomMarshaller(typeof(VectorView<>), MarshalMode.Default, typeof(SourceGenVectorViewMarshaller<>))]
+    public static unsafe class SourceGenVectorViewMarshaller<T>
+    {
+        public static void* ConvertToUnmanaged(VectorView<T> managed)
+        {
+            if (managed is null)
+                return null;
+
+            return managed.GetPointer();
+        }
+
+        public static VectorView<T> ConvertToManaged(void* unmanaged)
+        {
+            if (unmanaged == null)
+                return null;
+
+            return new VectorView<T>(unmanaged, false);
+        }
+
+        public static void Free(void* unmanaged) { }
+    }
+#endif
 }
