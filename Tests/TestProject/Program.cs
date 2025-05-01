@@ -38,6 +38,18 @@ namespace TestProject
             Vector<int> ModifiableNumbers { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<int>))] get; }
         }
 
+        [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIInspectable)]
+        [Guid("AE580A22-5CFC-4F16-9230-24EB36BA128C")]
+        interface IStaticTestClassDotNetTypes
+        {
+            IReadOnlyList<int> Numbers { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorViewMarshaller<int>))] get; }
+            IReadOnlyList<string> Strings { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorViewMarshaller<string>))] get; }
+            IReadOnlyList<IReadOnlyList<string>> NestedStrings { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorViewMarshaller<VectorView<string>>))] get; }
+            IReadOnlyList<PropertySet> PropertySets { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorViewMarshaller<PropertySet>))] get; }
+            IList<string> ModifiableStrings { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<string>))] get; }
+            IList<int> ModifiableNumbers { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<int>))] get; }
+        }
+
         [DllImport("TestComponent.dll", CallingConvention = CallingConvention.StdCall, PreserveSig = true)]
         static extern int DllGetActivationFactory([MarshalAs(UnmanagedType.HString)] string activatableClassId, void** factory);
 
@@ -226,6 +238,95 @@ namespace TestProject
             }
         }
 
+        static void TestDotNetMarshal(void* factory)
+        {
+            Debug.WriteLine(".NET Marshal Test");
+
+            IStaticTestClassDotNetTypes testClass = (IStaticTestClassDotNetTypes)Marshal.GetObjectForIUnknown((IntPtr)factory);
+            var numbers = testClass.Numbers;
+
+            var count = numbers.Count;
+            foreach (int i in numbers)
+            {
+                Debug.WriteLine(i);
+            }
+
+            var strings = testClass.Strings;
+            var count2 = strings.Count;
+            foreach (string i in strings)
+            {
+                Debug.WriteLine(i);
+            }
+
+            var nestedStrings = testClass.NestedStrings;
+            foreach (var i in nestedStrings)
+            {
+                Debug.WriteLine($"Count: {i.Count}");
+                foreach (string j in i)
+                {
+                    Debug.WriteLine(j);
+                }
+            }
+
+            var propertySets = testClass.PropertySets;
+            foreach (var i in propertySets)
+            {
+                Debug.WriteLine($"Count: {i.Count}");
+                foreach (var j in i)
+                {
+                    Debug.WriteLine(j);
+                }
+            }
+
+            var modifiableStrings = testClass.ModifiableStrings;
+
+            var count3 = modifiableStrings.Count;
+            Debug.WriteLine($"Count: {count3}");
+
+            foreach (string i in modifiableStrings)
+            {
+                Debug.WriteLine(i);
+            }
+
+            modifiableStrings.Add("Modifiable Four!!");
+
+            var count4 = modifiableStrings.Count;
+            Debug.WriteLine($"Count: {count4}");
+
+            foreach (string i in modifiableStrings)
+            {
+                Debug.WriteLine(i);
+            }
+
+            modifiableStrings[2] = "Modifiable Five!!";
+
+            foreach (string i in modifiableStrings)
+            {
+                Debug.WriteLine(i);
+            }
+
+            var modifiableNumbers = testClass.ModifiableNumbers;
+
+            foreach (int i in modifiableNumbers)
+            {
+                Debug.WriteLine(i);
+            }
+
+            modifiableNumbers.Add(100);
+
+            foreach (int i in modifiableNumbers)
+            {
+                Debug.WriteLine(i);
+            }
+
+            modifiableNumbers[2] = 700;
+
+            foreach (int i in modifiableNumbers)
+            {
+                Debug.WriteLine(i);
+            }
+        }
+
         public static void Main(string[] args)
         {
             void* factory = default;
@@ -233,6 +334,7 @@ namespace TestProject
 
             TestManualMarshal(factory);
             TestAutoMarshal(factory);
+            TestDotNetMarshal(factory);
         }
     }
 }
