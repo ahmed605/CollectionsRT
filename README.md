@@ -43,3 +43,9 @@ This library allows you to wrap WinRT generic collections' pointers and use them
 
 > [!NOTE]  
 > The wrapper types are [annotated](https://learn.microsoft.com/dotnet/api/system.runtime.interopservices.marshalling.nativemarshallingattribute) with these marshaller types so they will get automatically marshalled when used in a **source generated** [COM](https://learn.microsoft.com/dotnet/standard/native-interop/comwrappers-source-generation) or [P/Invoke](https://learn.microsoft.com/dotnet/standard/native-interop/pinvoke-source-generation) context without the need of specifying the marshallers manually.
+
+### TODO
+- [ ] Add support for missing collection types.
+- [ ] Figure out .NET Native support?
+- [ ] Add example usage in readme.
+- [ ] Write docs for the library.
