@@ -6,6 +6,11 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
 
+#if NET
+using WinRT;
+using System.Diagnostics.CodeAnalysis;
+#endif
+
 namespace CollectionsRT.Details
 {
     internal static class GuidHelpers
@@ -13,6 +18,29 @@ namespace CollectionsRT.Details
         private readonly static byte[] interface_namespace = [0x11, 0xf4, 0x7a, 0xd5, 0x7b, 0x73, 0x42, 0xc0, 0xab, 0xae, 0x87, 0x8b, 0x1e, 0x16, 0xad, 0xee];
 
         private static Dictionary<Type, Guid> _cachedGuids = new Dictionary<Type, Guid>();
+
+#if NET
+        private static bool TryGetDefaultInterfaceTypeForRuntimeClassType(Type runtimeClass, out Type defaultInterface)
+        {
+            runtimeClass = runtimeClass.GetRuntimeClassCCWType() ?? runtimeClass;
+            ProjectedRuntimeClassAttribute attr = runtimeClass.GetCustomAttribute<ProjectedRuntimeClassAttribute>();
+            if (attr is null)
+            {
+                defaultInterface = null;
+            }
+
+            if (attr.DefaultInterfaceProperty != null)
+            {
+                defaultInterface = runtimeClass.GetProperty(attr.DefaultInterfaceProperty, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly).PropertyType;
+            }
+            else
+            {
+                defaultInterface = attr.DefaultInterface;
+            }
+
+            return defaultInterface != null;
+        }
+#endif
 
         private static bool TryGetDefaultInterfaceSignatureForRuntimeClassType(Type type, out string ifaceSig)
         {
@@ -26,6 +54,13 @@ namespace CollectionsRT.Details
                 ifaceSig = "{" + guidAttr.Guid.ToString() + "}";
                 return true;
             }
+#if NET
+            else if (TryGetDefaultInterfaceTypeForRuntimeClassType(type, out Type defaultInterface))
+            {
+                ifaceSig = GetSignature(defaultInterface, true);
+                return true;
+            }
+#endif
             else if (type.GetInterfaces()?.FirstOrDefault() is Type t)
             {
                 ifaceSig = GetSignature(t, true);
@@ -60,7 +95,14 @@ namespace CollectionsRT.Details
             }
         }
 
-        private static string GetSignature(Type type, bool doNotTreatAsRuntimeClass = false)
+        private static string GetSignature
+        (
+#if NET
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicFields)]
+#endif
+            Type type,
+            bool doNotTreatAsRuntimeClass = false
+        )
         {
             if (type == typeof(object))
             {
@@ -164,7 +206,11 @@ namespace CollectionsRT.Details
             var data = new byte[sig.Length + 16];
             interface_namespace.CopyTo(data, 0);
             sig.CopyTo(data, 16);
+#if NET
+            using SHA1 sha = SHA1.Create();
+#else
             using SHA1 sha = new SHA1CryptoServiceProvider();
+#endif
             var encodedGuid = EncodeGuid(sha.ComputeHash(data));
             _cachedGuids.Add(typeof(T), encodedGuid);
             return encodedGuid;

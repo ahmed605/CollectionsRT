@@ -5,12 +5,14 @@ using System.Runtime.InteropServices;
 
 namespace CollectionsRT.Details
 {
+#if !NET
     file static class VectorDelegates
     {
         internal static readonly Dictionary<Type, Type> IndexOf_Delegates = [];
         internal static readonly Dictionary<Type, Type> SetOrInsertAt_Delegates = [];
         internal static readonly Dictionary<Type, Type> Append_Delegates = [];
     }
+#endif
 
     [StructLayout(LayoutKind.Sequential)]
     [Guid("913337E9-11A1-4345-A3A2-4E7F956E222D")]
@@ -88,6 +90,10 @@ namespace CollectionsRT.Details
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal int IndexOfValue(T value, uint* index, byte* found)
         {
+#if NET
+            return IndexOf(value, index, found);
+#else
+
             Type fn_delegate = null;
             if(!VectorDelegates.IndexOf_Delegates.TryGetValue(typeof(T), out fn_delegate))
             {
@@ -96,6 +102,7 @@ namespace CollectionsRT.Details
             }
 
             return (int)Marshal.GetDelegateForFunctionPointer((IntPtr)_vtbl[9], fn_delegate).DynamicInvoke([(nint)Unsafe.AsPointer(ref this), value, (nint)index, (nint)found]);
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -114,6 +121,9 @@ namespace CollectionsRT.Details
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal int SetValueAt(uint index, T item)
         {
+#if NET
+            return SetAt(index, item);
+#else
             Type fn_delegate = null;
             if (!VectorDelegates.SetOrInsertAt_Delegates.TryGetValue(typeof(T), out fn_delegate))
             {
@@ -122,6 +132,7 @@ namespace CollectionsRT.Details
             }
 
             return (int)Marshal.GetDelegateForFunctionPointer((IntPtr)_vtbl[10], fn_delegate).DynamicInvoke([(nint)Unsafe.AsPointer(ref this), index, item]);
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -140,6 +151,9 @@ namespace CollectionsRT.Details
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal int InsertValueAt(uint index, T item)
         {
+#if NET
+            return InsertAt(index, item);
+#else
             Type fn_delegate = null;
             if (!VectorDelegates.SetOrInsertAt_Delegates.TryGetValue(typeof(T), out fn_delegate))
             {
@@ -148,6 +162,7 @@ namespace CollectionsRT.Details
             }
 
             return (int)Marshal.GetDelegateForFunctionPointer((IntPtr)_vtbl[11], fn_delegate).DynamicInvoke([(nint)Unsafe.AsPointer(ref this), index, item]);
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -172,6 +187,9 @@ namespace CollectionsRT.Details
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal int AppendValue(T item)
         {
+#if NET
+            return Append(item);
+#else
             Type fn_delegate = null;
             if (!VectorDelegates.Append_Delegates.TryGetValue(typeof(T), out fn_delegate))
             {
@@ -180,6 +198,7 @@ namespace CollectionsRT.Details
             }
 
             return (int)Marshal.GetDelegateForFunctionPointer((IntPtr)_vtbl[13], fn_delegate).DynamicInvoke([(nint)Unsafe.AsPointer(ref this), item]);
+#endif
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

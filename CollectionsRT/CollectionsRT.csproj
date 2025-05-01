@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net9.0-windows10.0.22621.0</TargetFrameworks>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
     <LangVersion>12.0</LangVersion>
     <Platforms>AnyCPU</Platforms>
@@ -10,8 +10,8 @@
   <ItemGroup>
     <PackageReference Include="System.Memory" Version="4.6.3" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.1.2" />
-    <PackageReference Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.WindowsRuntime" Version="5.0.0-preview.5.20278.1" />
+    <PackageReference Condition="'$(TargetFramework)' == 'netstandard2.0'" Include="System.Runtime.InteropServices.WindowsRuntime" Version="4.3.0" />
+    <PackageReference Condition="'$(TargetFramework)' == 'netstandard2.0'" Include="System.Runtime.WindowsRuntime" Version="5.0.0-preview.5.20278.1" />
   </ItemGroup>
 
   <ItemGroup>

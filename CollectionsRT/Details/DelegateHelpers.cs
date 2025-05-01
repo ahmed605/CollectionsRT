@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Reflection;
+using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
-using System.Text;
 
 namespace CollectionsRT.Details
 {
+#if !NET
     internal static class DelegateHelpers
     {
         private static readonly Func<Type[], Type> MakeNewCustomDelegate = (Func<Type[], Type>)Delegate.CreateDelegate(
@@ -21,4 +20,5 @@ namespace CollectionsRT.Details
             return MakeNewCustomDelegate(parameters);
         }
     }
+#endif
 }
