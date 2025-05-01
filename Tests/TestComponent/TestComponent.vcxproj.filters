@@ -12,9 +12,11 @@
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="$(GeneratedFilesDir)module.g.cpp" />
+    <ClCompile Include="NonStaticTestClass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="NonStaticTestClass.h" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="TestClass.idl" />

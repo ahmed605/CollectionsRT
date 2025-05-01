@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CollectionsRT.Interop;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -13,15 +14,26 @@ namespace CollectionsRT.Details
 
         private static Dictionary<Type, Guid> _cachedGuids = new Dictionary<Type, Guid>();
 
-        private static bool TryGetDefaultInterfaceTypeForRuntimeClassType(Type type, out Type iface)
+        private static bool TryGetDefaultInterfaceSignatureForRuntimeClassType(Type type, out string ifaceSig)
         {
-            if (type.GetInterfaces()?.FirstOrDefault() is Type t)
+            if (type.GetCustomAttribute<RuntimeClassDefaultInterfaceAttribute>() is RuntimeClassDefaultInterfaceAttribute attr)
             {
-                iface = t;
+                var iface = attr.DefaultInterface;
+                ifaceSig = GetSignature(iface, iface == type);
+                return true;
+            }
+            else if (type.GetCustomAttribute<RuntimeClassDefaultInterfaceGuidAttribute>() is RuntimeClassDefaultInterfaceGuidAttribute guidAttr)
+            {
+                ifaceSig = "{" + guidAttr.Guid.ToString() + "}";
+                return true;
+            }
+            else if (type.GetInterfaces()?.FirstOrDefault() is Type t)
+            {
+                ifaceSig = GetSignature(t);
                 return true;
             }
 
-            iface = null;
+            ifaceSig = string.Empty;
             return false;
         }
 
@@ -49,7 +61,7 @@ namespace CollectionsRT.Details
             }
         }
 
-        private static string GetSignature(Type type)
+        private static string GetSignature(Type type, bool doNotTreatAsRuntimeClass = false)
         {
             if (type == typeof(object))
             {
@@ -97,7 +109,7 @@ namespace CollectionsRT.Details
 
             if (type.IsGenericType)
             {
-                var args = type.GetGenericArguments().Select(GetSignature);
+                var args = type.GetGenericArguments().Select(t => GetSignature(t));
                 return "pinterface({" + GetParameterizedIID(type) + "};" + String.Join(";", args) + ")";
             }
 
@@ -106,9 +118,15 @@ namespace CollectionsRT.Details
                 return "delegate({" + type.GUID + "})";
             }
 
-            if (type.IsClass && TryGetDefaultInterfaceTypeForRuntimeClassType(type, out Type iface))
+            if ((type.IsClass || (type.IsDefined(typeof(TreatAsWindowsRuntimeClassAttribute)) && !doNotTreatAsRuntimeClass)) && TryGetDefaultInterfaceSignatureForRuntimeClassType(type, out string ifaceSig))
             {
-                return "rc(" + type.FullName + ";" + GetSignature(iface) + ")";
+                string name = type.FullName;
+                if (type.GetCustomAttribute<RuntimeClassNameAttribute>() is RuntimeClassNameAttribute attr)
+                {
+                    name = attr.RuntimeClassName;
+                }
+
+                return "rc(" + name + ";" + ifaceSig + ")";
             }
 
             return "{" + type.GUID.ToString() + "}";

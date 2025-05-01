@@ -1,6 +1,7 @@
 ﻿#include "pch.h"
 #include "TestClass.h"
 #include "TestClass.g.cpp"
+#include "NonStaticTestClass.h"
 
 namespace winrt::TestComponent::implementation
 {
@@ -72,5 +73,12 @@ namespace winrt::TestComponent::implementation
 		modifiableNumbers.Append(20);
 		modifiableNumbers.Append(30);
 		return modifiableNumbers;
+	}
+
+	winrt::Windows::Foundation::Collections::IVector<winrt::TestComponent::NonStaticTestClass> TestClass::Classes()
+	{
+		auto classes = single_threaded_vector<winrt::TestComponent::NonStaticTestClass>();
+		classes.Append(winrt::make<winrt::TestComponent::implementation::NonStaticTestClass>());
+		return classes;
 	}
 }

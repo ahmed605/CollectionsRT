@@ -1,5 +1,6 @@
 ﻿using CollectionsRT;
 using CollectionsRT.Details;
+using CollectionsRT.Interop;
 using CollectionsRT.Marshallers;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,16 @@ namespace TestProject
 {
     public unsafe class Program
     {
+        [TreatAsWindowsRuntimeClass]
+        [RuntimeClassName("TestComponent.NonStaticTestClass")]
+        [RuntimeClassDefaultInterface(typeof(INonStaticTestClass))]
+        [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIInspectable)]
+        [Guid("E085521E-4B9F-42D8-A99C-DF0A29F6D44A")]
+        interface INonStaticTestClass
+        {
+            String TheString { [return: MarshalAs(UnmanagedType.HString)] get; }
+        }
+
         [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIInspectable)]
         [Guid("AE580A22-5CFC-4F16-9230-24EB36BA128C")]
         interface IStaticTestClass
@@ -24,6 +35,7 @@ namespace TestProject
             void* PropertySets { get; }
             void* ModifiableStrings { get; }
             void* ModifiableNumbers { get; }
+            void* Classes { get; }
         }
 
         [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIInspectable)]
@@ -36,6 +48,7 @@ namespace TestProject
             VectorView<PropertySet> PropertySets { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorViewMarshaller<PropertySet>))] get; }
             Vector<string> ModifiableStrings { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<string>))] get; }
             Vector<int> ModifiableNumbers { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<int>))] get; }
+            Vector<INonStaticTestClass> Classes { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<INonStaticTestClass>))] get; }
         }
 
         [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIInspectable)]
@@ -48,6 +61,7 @@ namespace TestProject
             IReadOnlyList<PropertySet> PropertySets { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorViewMarshaller<PropertySet>))] get; }
             IList<string> ModifiableStrings { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<string>))] get; }
             IList<int> ModifiableNumbers { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<int>))] get; }
+            IList<INonStaticTestClass> Classes { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<INonStaticTestClass>))] get; }
         }
 
         [DllImport("TestComponent.dll", CallingConvention = CallingConvention.StdCall, PreserveSig = true)]
@@ -147,6 +161,13 @@ namespace TestProject
             {
                 Debug.WriteLine(i);
             }
+
+            var classes = testClass.Classes;
+            var vector3 = new Vector<INonStaticTestClass>(classes);
+            foreach (INonStaticTestClass i in vector3)
+            {
+                Debug.WriteLine(i.TheString);
+            }
         }
 
         static void TestAutoMarshal(void* factory)
@@ -236,6 +257,12 @@ namespace TestProject
             {
                 Debug.WriteLine(i);
             }
+
+            var classes = testClass.Classes;
+            foreach (INonStaticTestClass i in classes)
+            {
+                Debug.WriteLine(i.TheString);
+            }
         }
 
         static void TestDotNetMarshal(void* factory)
@@ -324,6 +351,12 @@ namespace TestProject
             foreach (int i in modifiableNumbers)
             {
                 Debug.WriteLine(i);
+            }
+
+            var classes = testClass.Classes;
+            foreach (INonStaticTestClass i in classes)
+            {
+                Debug.WriteLine(i.TheString);
             }
         }
 

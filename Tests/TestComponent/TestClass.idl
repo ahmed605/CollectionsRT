@@ -1,5 +1,16 @@
 namespace TestComponent
 {
+    [uuid("E085521E-4B9F-42D8-A99C-DF0A29F6D44A")]
+    interface INonStaticTestClass
+    {
+        String TheString { get; };
+    }
+
+	runtimeclass NonStaticTestClass : [default] INonStaticTestClass
+	{
+
+	}
+
     [default_interface]
     runtimeclass TestClass
     {
@@ -11,6 +22,7 @@ namespace TestComponent
 			static IVectorView<Windows.Foundation.Collections.PropertySet> PropertySets { get; };
             static IVector<String> ModifiableStrings { get; };
             static IVector<Int32> ModifiableNumbers { get; };
+            static IVector<NonStaticTestClass> Classes { get; };
         }
     }
 }
