@@ -10,7 +10,7 @@ namespace CollectionsRT.Details
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal unsafe interface IIterable
     {
-        internal object CreateInstance(void* iterable, bool addRef = true);
+        internal object CreateInstance(void* iterable, bool addRef = false);
         internal object CreateInstance(void* iterable, Guid iid);
     }
 
@@ -18,7 +18,7 @@ namespace CollectionsRT.Details
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal unsafe interface IIterator
     {
-        internal object CreateInstance(void* iterator, bool addRef = true, IInspectable* iterable = null);
+        internal object CreateInstance(void* iterator, bool addRef = false, IInspectable* iterable = null);
         internal object CreateInstance(void* iterator, Guid iid);
     }
 
@@ -26,8 +26,8 @@ namespace CollectionsRT.Details
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal unsafe interface IVectorView
     {
-        internal object CreateInstance(void* view, bool addRef = true);
-        internal object CreateInstance(void* view, Guid iterableIID, bool addRef = true);
+        internal object CreateInstance(void* view, bool addRef = false);
+        internal object CreateInstance(void* view, Guid iterableIID, bool addRef = false);
         internal object CreateInstance(void* view, Guid iid, Guid iterableIID);
         internal object CreateInstance(void* view, Guid iid);
     }
@@ -36,8 +36,8 @@ namespace CollectionsRT.Details
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal unsafe interface IVector
     {
-        internal object CreateInstance(void* vector, bool addRef = true);
-        internal object CreateInstance(void* vector, Guid iterableIID, bool addRef = true);
+        internal object CreateInstance(void* vector, bool addRef = false);
+        internal object CreateInstance(void* vector, Guid iterableIID, bool addRef = false);
         internal object CreateInstance(void* vector, Guid iid, Guid iterableIID);
         internal object CreateInstance(void* vector, Guid iid);
     }

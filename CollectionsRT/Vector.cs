@@ -10,7 +10,7 @@ namespace CollectionsRT
     {
         private IVector<nint>* _vector;
 
-        public Vector(void* vector, Guid iterableIID, bool addRef = true) : base(vector, iterableIID)
+        public Vector(void* vector, Guid iterableIID, bool addRef = false) : base(vector, iterableIID)
         {
             if (vector is null)
                 throw new ArgumentNullException($"{nameof(vector)} cannot be null.");
@@ -19,7 +19,7 @@ namespace CollectionsRT
             if (addRef) _vector->AddRef();
         }
 
-        public Vector(void* vector, bool addRef = true) : this(vector, GuidHelpers.CreateGuidForGenericType<Iterable<T>>(), addRef) { }
+        public Vector(void* vector, bool addRef = false) : this(vector, GuidHelpers.CreateGuidForGenericType<Iterable<T>>(), addRef) { }
 
         public Vector(void* vector, Guid iid, Guid iterableIID) : base(vector, iterableIID)
         {

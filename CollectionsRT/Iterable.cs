@@ -9,7 +9,7 @@ namespace CollectionsRT
     {
         private IIterable<nint>* _iterable;
 
-        public Iterable(void* iterable, bool addRef = true)
+        public Iterable(void* iterable, bool addRef = false)
         {
             if (iterable is null)
                 throw new ArgumentNullException($"{nameof(iterable)} cannot be null.");

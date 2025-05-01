@@ -126,7 +126,9 @@ namespace CollectionsRT.Details
             }
             else if (typeof(ICollectionType).IsAssignableFrom(t))
             {
-                return ((ICollectionType)value).GetPointer();
+                var ptr = ((ICollectionType)value).GetPointer();
+                ((IUnknown*)ptr)->AddRef();
+                return ptr;
             }
 
 #if !NET

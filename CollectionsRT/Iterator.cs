@@ -13,7 +13,7 @@ namespace CollectionsRT
         private IIterable<nint>* _iterable;
         private bool _movedOnce = false;
 
-        internal Iterator(void* iterator, bool addRef = true, IInspectable* iterable = null)
+        internal Iterator(void* iterator, bool addRef = false, IInspectable* iterable = null)
         {
             if (iterator is null)
                 throw new ArgumentNullException($"{nameof(iterator)} cannot be null.");
@@ -28,7 +28,7 @@ namespace CollectionsRT
             }
         }
 
-        public Iterator(void* iterator, bool addRef = true) : this(iterator, addRef, null) { }
+        public Iterator(void* iterator, bool addRef = false) : this(iterator, addRef, null) { }
 
         public Iterator(void* iterator, Guid iid)
         {

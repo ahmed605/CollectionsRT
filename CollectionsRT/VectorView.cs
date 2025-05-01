@@ -11,7 +11,7 @@ namespace CollectionsRT
     {
         private IVectorView<nint>* _view;
 
-        public VectorView(void* view, Guid iterableIID, bool addRef = true) : base(view, iterableIID)
+        public VectorView(void* view, Guid iterableIID, bool addRef = false) : base(view, iterableIID)
         {
             if (view is null)
                 throw new ArgumentNullException($"{nameof(view)} cannot be null.");
@@ -20,7 +20,7 @@ namespace CollectionsRT
             if (addRef) _view->AddRef();
         }
 
-        public VectorView(void* view, bool addRef = true) : this(view, GuidHelpers.CreateGuidForGenericType<Iterable<T>>(), addRef) { }
+        public VectorView(void* view, bool addRef = false) : this(view, GuidHelpers.CreateGuidForGenericType<Iterable<T>>(), addRef) { }
 
         public VectorView(void* view, Guid iid, Guid iterableIID) : base(view, iterableIID)
         {
