@@ -69,7 +69,14 @@ namespace CollectionsRT
         { 
             get
             {
-                if (typeof(T).IsBlittable())
+                Type t = typeof(T);
+                if (t == typeof(bool))
+                {
+                    byte value = 0;
+                    Marshal.ThrowExceptionForHR(((IVector<byte>*)_vector)->GetAt((uint)index, &value));
+                    return (T)(object)(value != 0);
+                }
+                else if (t.IsBlittable())
                 {
                     T value = default;
                     Marshal.ThrowExceptionForHR(((IVector<T>*)_vector)->GetAt((uint)index, &value));
@@ -85,7 +92,12 @@ namespace CollectionsRT
 
             set
             {
-                if (typeof(T).IsBlittable())
+                Type t = typeof(T);
+                if (t == typeof(bool))
+                {
+                    Marshal.ThrowExceptionForHR(((IVector<byte>*)_vector)->SetAt((uint)index, *(byte*)&value));
+                }
+                else if (t.IsBlittable())
                 {
                     Marshal.ThrowExceptionForHR(((IVector<T>*)_vector)->SetValueAt((uint)index, value));
                 }
@@ -110,7 +122,12 @@ namespace CollectionsRT
 
         public void Add(T item)
         {
-            if (typeof(T).IsBlittable())
+            Type t = typeof(T);
+            if (t == typeof(bool))
+            {
+                Marshal.ThrowExceptionForHR(((IVector<byte>*)_vector)->AppendValue(*(byte*)&item));
+            }
+            else if (t.IsBlittable())
             {
                 Marshal.ThrowExceptionForHR(((IVector<T>*)_vector)->AppendValue(item));
             }
@@ -127,7 +144,15 @@ namespace CollectionsRT
 
         public bool Contains(T item)
         {
-            if (typeof(T).IsBlittable())
+            Type t = typeof(T);
+            if (t == typeof(bool))
+            {
+                byte found = 0;
+                uint index = 0;
+                Marshal.ThrowExceptionForHR(((IVector<byte>*)_vector)->IndexOfValue(*(byte*)&item, &index, &found));
+                return found != 0;
+            }
+            else if (t.IsBlittable())
             {
                 byte found = 0;
                 uint index = 0;
@@ -151,7 +176,8 @@ namespace CollectionsRT
             if (arrayIndex < 0 || arrayIndex >= array.Length)
                 throw new ArgumentOutOfRangeException($"{nameof(arrayIndex)} is out of range.");
 
-            if (typeof(T).IsBlittable())
+            Type t = typeof(T);
+            if (t != typeof(bool) && t.IsBlittable())
             {
                 fixed (T* pArray = array)
                 {
@@ -172,7 +198,15 @@ namespace CollectionsRT
 
         public int IndexOf(T item)
         {
-            if (typeof(T).IsBlittable())
+            Type t = typeof(T);
+            if (t == typeof(bool))
+            {
+                byte found = 0;
+                uint index = 0;
+                Marshal.ThrowExceptionForHR(((IVector<byte>*)_vector)->IndexOfValue(*(byte*)&item, &index, &found));
+                return found != 0 ? (int)index : -1;
+            }
+            else if (t.IsBlittable())
             {
                 byte found = 0;
                 uint index = 0;
@@ -190,7 +224,15 @@ namespace CollectionsRT
 
         public void Insert(int index, T item)
         {
-            if (typeof(T).IsBlittable())
+            if (index < 0 || index >= Count)
+                throw new ArgumentOutOfRangeException($"{nameof(index)} is out of range.");
+
+            Type t = typeof(T);
+            if (t == typeof(bool))
+            {
+                Marshal.ThrowExceptionForHR(((IVector<byte>*)_vector)->InsertValueAt((uint)index, *(byte*)&item));
+            }
+            else if (t.IsBlittable())
             {
                 Marshal.ThrowExceptionForHR(((IVector<T>*)_vector)->InsertValueAt((uint)index, item));
             }
@@ -202,7 +244,19 @@ namespace CollectionsRT
 
         public bool Remove(T item)
         {
-            if (typeof(T).IsBlittable())
+            Type t = typeof(T);
+            if (t == typeof(bool))
+            {
+                byte found = 0;
+                uint index = 0;
+                Marshal.ThrowExceptionForHR(((IVector<byte>*)_vector)->IndexOfValue(*(byte*)&item, &index, &found));
+                if (found != 0)
+                {
+                    Marshal.ThrowExceptionForHR(((IVector<byte>*)_vector)->RemoveAt(index));
+                    return true;
+                }
+            }
+            else if (t.IsBlittable())
             {
                 byte found = 0;
                 uint index = 0;

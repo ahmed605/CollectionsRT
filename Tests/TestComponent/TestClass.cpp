@@ -81,4 +81,14 @@ namespace winrt::TestComponent::implementation
 		classes.Append(winrt::make<winrt::TestComponent::implementation::NonStaticTestClass>());
 		return classes;
 	}
+
+	winrt::Windows::Foundation::Collections::IVector<bool> TestClass::Booleans()
+	{
+		auto booleans = single_threaded_vector<bool>();
+		booleans.Append(true);
+		booleans.Append(false);
+		booleans.Append(false);
+		booleans.Append(true);
+		return booleans;
+	}
 }

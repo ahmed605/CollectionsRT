@@ -23,6 +23,7 @@ namespace TestComponent
             static IVector<String> ModifiableStrings { get; };
             static IVector<Int32> ModifiableNumbers { get; };
             static IVector<NonStaticTestClass> Classes { get; };
+            static IVector<Boolean> Booleans { get; };
         }
     }
 }

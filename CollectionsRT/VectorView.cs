@@ -70,7 +70,17 @@ namespace CollectionsRT
         {
             get
             {
-                if (typeof(T).IsBlittable())
+                if (index < 0 || index >= Count)
+                    throw new ArgumentOutOfRangeException($"{nameof(index)} is out of range.");
+
+                Type t = typeof(T);
+                if (t == typeof(bool))
+                {
+                    byte value = default;
+                    Marshal.ThrowExceptionForHR(((IVectorView<byte>*)_view)->GetAt((uint)index, &value));
+                    return (T)(object)(value != 0);
+                }
+                else if (t.IsBlittable())
                 {
                     T value = default;
                     Marshal.ThrowExceptionForHR(((IVectorView<T>*)_view)->GetAt((uint)index, &value));

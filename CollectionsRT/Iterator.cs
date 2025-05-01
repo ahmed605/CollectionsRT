@@ -72,7 +72,14 @@ namespace CollectionsRT
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private T GetCurrent()
         {
-            if (typeof(T).IsBlittable())
+            Type t = typeof(T);
+            if (t == typeof(bool))
+            {
+                byte value = default;
+                Marshal.ThrowExceptionForHR(((IIterator<byte>*)_iterator)->get_Current(&value));
+                return (T)(object)(value != 0);
+            }
+            else if (t.IsBlittable())
             {
                 T value = default;
                 Marshal.ThrowExceptionForHR(((IIterator<T>*)_iterator)->get_Current(&value));

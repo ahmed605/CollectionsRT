@@ -15,6 +15,7 @@ namespace winrt::TestComponent::implementation
         static winrt::Windows::Foundation::Collections::IVector<hstring> ModifiableStrings();
         static winrt::Windows::Foundation::Collections::IVector<int32_t> ModifiableNumbers();
 		static winrt::Windows::Foundation::Collections::IVector<winrt::TestComponent::NonStaticTestClass> Classes();
+		static winrt::Windows::Foundation::Collections::IVector<bool> Booleans();
     };
 }
 

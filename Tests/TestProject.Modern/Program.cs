@@ -53,6 +53,7 @@ namespace TestProject.Modern
             void* ModifiableStrings { get; }
             void* ModifiableNumbers { get; }
             void* Classes { get; }
+            void* Booleans { get; }
         }
 
         [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -70,6 +71,7 @@ namespace TestProject.Modern
             Vector<string> ModifiableStrings { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<string>))] get; }
             Vector<int> ModifiableNumbers { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<int>))] get; }
             Vector<INonStaticTestClass> Classes { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<INonStaticTestClass>))] get; }
+            Vector<bool> Booleans { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<bool>))] get; }
         }
 
         [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -87,6 +89,7 @@ namespace TestProject.Modern
             IList<string> ModifiableStrings { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<string>))] get; }
             IList<int> ModifiableNumbers { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<int>))] get; }
             IList<INonStaticTestClass> Classes { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<INonStaticTestClass>))] get; }
+            IList<bool> Booleans { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<bool>))] get; }
         }
 
         [GeneratedComInterface]
@@ -104,6 +107,7 @@ namespace TestProject.Modern
             Vector<string> ModifiableStrings();
             Vector<int> ModifiableNumbers();
             Vector<INonStaticTestClassSourceGen> Classes();
+            Vector<bool> Booleans();
         }
 
         [DllImport("TestComponent.dll", CallingConvention = CallingConvention.StdCall, PreserveSig = true)]
@@ -114,6 +118,7 @@ namespace TestProject.Modern
             Console.WriteLine("Manual Marshal Test");
 
             IStaticTestClass testClass = (IStaticTestClass)Marshal.GetObjectForIUnknown((IntPtr)factory);
+
             var numbers = testClass.Numbers;
 
             var view = new VectorView<int>(numbers);
@@ -210,6 +215,21 @@ namespace TestProject.Modern
             {
                 Console.WriteLine(i.TheString);
             }
+
+            var booleans = testClass.Booleans;
+            var vector4 = new Vector<bool>(booleans);
+
+            foreach (bool i in vector4)
+            {
+                Console.WriteLine(i);
+            }
+
+            vector4.Add(true);
+
+            foreach (bool i in vector4)
+            {
+                Console.WriteLine(i);
+            }
         }
 
         static void TestAutoMarshal(void* factory)
@@ -304,6 +324,19 @@ namespace TestProject.Modern
             foreach (INonStaticTestClass i in classes)
             {
                 Console.WriteLine(i.TheString);
+            }
+
+            var booleans = testClass.Booleans;
+            foreach (bool i in booleans)
+            {
+                Console.WriteLine(i);
+            }
+
+            booleans.Add(true);
+
+            foreach (bool i in booleans)
+            {
+                Console.WriteLine(i);
             }
         }
 
@@ -400,6 +433,19 @@ namespace TestProject.Modern
             {
                 Console.WriteLine(i.TheString);
             }
+
+            var booleans = testClass.Booleans;
+            foreach (bool i in booleans)
+            {
+                Console.WriteLine(i);
+            }
+
+            booleans.Add(true);
+
+            foreach (bool i in booleans)
+            {
+                Console.WriteLine(i);
+            }
         }
 
         static void TestSourceGenMarshal(void* factory)
@@ -494,6 +540,19 @@ namespace TestProject.Modern
             foreach (INonStaticTestClassSourceGen i in classes)
             {
                 Console.WriteLine(i.TheString());
+            }
+
+            var booleans = testClass.Booleans();
+            foreach (bool i in booleans)
+            {
+                Console.WriteLine(i);
+            }
+
+            booleans.Add(true);
+
+            foreach (bool i in booleans)
+            {
+                Console.WriteLine(i);
             }
         }
 

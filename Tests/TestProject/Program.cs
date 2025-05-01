@@ -32,6 +32,7 @@ namespace TestProject
             void* ModifiableStrings { get; }
             void* ModifiableNumbers { get; }
             void* Classes { get; }
+            void* Booleans { get; }
         }
 
         [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIInspectable)]
@@ -45,6 +46,7 @@ namespace TestProject
             Vector<string> ModifiableStrings { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<string>))] get; }
             Vector<int> ModifiableNumbers { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<int>))] get; }
             Vector<INonStaticTestClass> Classes { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<INonStaticTestClass>))] get; }
+            Vector<bool> Booleans { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<bool>))] get; }
         }
 
         [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIInspectable)]
@@ -58,6 +60,7 @@ namespace TestProject
             IList<string> ModifiableStrings { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<string>))] get; }
             IList<int> ModifiableNumbers { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<int>))] get; }
             IList<INonStaticTestClass> Classes { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<INonStaticTestClass>))] get; }
+            IList<bool> Booleans { [return: MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(VectorMarshaller<bool>))] get; }
         }
 
         [DllImport("TestComponent.dll", CallingConvention = CallingConvention.StdCall, PreserveSig = true)]
@@ -164,6 +167,20 @@ namespace TestProject
             {
                 Debug.WriteLine(i.TheString);
             }
+
+            var booleans = testClass.Booleans;
+            var vector4 = new Vector<bool>(booleans);
+            foreach (bool i in vector4)
+            {
+                Debug.WriteLine(i);
+            }
+
+            vector4.Add(true);
+
+            foreach (bool i in vector4)
+            {
+                Debug.WriteLine(i);
+            }
         }
 
         static void TestAutoMarshal(void* factory)
@@ -259,6 +276,19 @@ namespace TestProject
             {
                 Debug.WriteLine(i.TheString);
             }
+
+            var booleans = testClass.Booleans;
+            foreach (bool i in booleans)
+            {
+                Debug.WriteLine(i);
+            }
+
+            booleans.Add(true);
+
+            foreach (bool i in booleans)
+            {
+                Debug.WriteLine(i);
+            }
         }
 
         static void TestDotNetMarshal(void* factory)
@@ -353,6 +383,19 @@ namespace TestProject
             foreach (INonStaticTestClass i in classes)
             {
                 Debug.WriteLine(i.TheString);
+            }
+
+            var booleans = testClass.Booleans;
+            foreach (bool i in booleans)
+            {
+                Debug.WriteLine(i);
+            }
+
+            booleans.Add(true);
+
+            foreach (bool i in booleans)
+            {
+                Debug.WriteLine(i);
             }
         }
 
