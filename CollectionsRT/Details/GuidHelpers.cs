@@ -28,7 +28,7 @@ namespace CollectionsRT.Details
             }
             else if (type.GetInterfaces()?.FirstOrDefault() is Type t)
             {
-                ifaceSig = GetSignature(t);
+                ifaceSig = GetSignature(t, true);
                 return true;
             }
 
