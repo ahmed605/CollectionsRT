@@ -22,8 +22,19 @@ namespace CollectionsRT
             if (vector is null)
                 throw new ArgumentNullException($"{nameof(vector)} cannot be null.");
 
-            _vector = (IVector<nint>*)vector;
-            if (addRef) _vector->AddRef();
+            if (CollectionsBehaviors.AlwaysQueryInterfacePassedPointers)
+            {
+                IVector<nint>* ptr = default;
+                Guid iid = GuidHelpers.CreateGuidForGenericType<Vector<T>>();
+                Marshal.ThrowExceptionForHR(((IUnknown*)vector)->QueryInterface(&iid, (void**)&ptr));
+                if (!addRef) ptr->Release();
+                _vector = ptr;
+            }
+            else
+            {
+                _vector = (IVector<nint>*)vector;
+                if (addRef) _vector->AddRef();
+            }
         }
 
         public Vector(void* vector, bool addRef = false) : this(vector, GuidHelpers.CreateGuidForGenericType<Iterable<T>>(), addRef) { }

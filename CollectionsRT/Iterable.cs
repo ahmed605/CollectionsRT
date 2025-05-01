@@ -22,8 +22,19 @@ namespace CollectionsRT
             if (iterable is null)
                 throw new ArgumentNullException($"{nameof(iterable)} cannot be null.");
 
-            _iterable = (IIterable<nint>*)iterable;
-            if (addRef) _iterable->AddRef();
+            if (CollectionsBehaviors.AlwaysQueryInterfacePassedPointers)
+            {
+                IIterable<nint>* ptr = default;
+                Guid iid = GuidHelpers.CreateGuidForGenericType<Iterable<T>>();
+                Marshal.ThrowExceptionForHR(((IUnknown*)iterable)->QueryInterface(&iid, (void**)&ptr));
+                if (!addRef) ptr->Release();
+                _iterable = ptr;
+            }
+            else
+            {
+                _iterable = (IIterable<nint>*)iterable;
+                if (addRef) _iterable->AddRef();
+            }
         }
 
         public Iterable(void* iterable, Guid iid)

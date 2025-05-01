@@ -2,6 +2,7 @@
 using CollectionsRT.Marshallers;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Runtime.InteropServices;
 
 #if NET
@@ -22,8 +23,19 @@ namespace CollectionsRT
             if (view is null)
                 throw new ArgumentNullException($"{nameof(view)} cannot be null.");
 
-            _view = (IVectorView<nint>*)view;
-            if (addRef) _view->AddRef();
+            if (CollectionsBehaviors.AlwaysQueryInterfacePassedPointers)
+            {
+                IVectorView<nint>* ptr = default;
+                Guid iid = GuidHelpers.CreateGuidForGenericType<VectorView<T>>();
+                Marshal.ThrowExceptionForHR(((IUnknown*)view)->QueryInterface(&iid, (void**)&ptr));
+                if (!addRef) ptr->Release();
+                _view = ptr;
+            }
+            else
+            {
+                _view = (IVectorView<nint>*)view;
+                if (addRef) _view->AddRef();
+            }
         }
 
         public VectorView(void* view, bool addRef = false) : this(view, GuidHelpers.CreateGuidForGenericType<Iterable<T>>(), addRef) { }
