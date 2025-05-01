@@ -1,15 +1,11 @@
-﻿using CollectionsRT;
-using CollectionsRT.Details;
+﻿using System;
+using System.Diagnostics;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using Windows.Foundation.Collections;
+using CollectionsRT;
 using CollectionsRT.Interop;
 using CollectionsRT.Marshallers;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.Foundation.Collections;
 
 namespace TestProject
 {

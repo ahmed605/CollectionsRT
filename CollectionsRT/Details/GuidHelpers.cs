@@ -18,8 +18,7 @@ namespace CollectionsRT.Details
         {
             if (type.GetCustomAttribute<RuntimeClassDefaultInterfaceAttribute>() is RuntimeClassDefaultInterfaceAttribute attr)
             {
-                var iface = attr.DefaultInterface;
-                ifaceSig = GetSignature(iface, iface == type);
+                ifaceSig = GetSignature(attr.DefaultInterface, true);
                 return true;
             }
             else if (type.GetCustomAttribute<RuntimeClassDefaultInterfaceGuidAttribute>() is RuntimeClassDefaultInterfaceGuidAttribute guidAttr)
